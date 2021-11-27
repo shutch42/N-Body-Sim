@@ -30,6 +30,3 @@ class Body:
         print(self.mass)
         print(self.x, self.y, self.z)
         print(self.vx, self.vy, self.vz)
-
-Earth = Body(mass = 5.972e24, x = 0, y = 0, z = 0, vx = 0, vy = 0, vz = 0)
-Earth.get_info()

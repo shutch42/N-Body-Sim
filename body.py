@@ -8,24 +8,6 @@ class Body:
         self.vy = vy
         self.vz = vz
 
-    def set_x(self, x):
-        self.x = x
-
-    def set_y(self, y):
-        self.y = y
-
-    def set_z(self, z):
-        self.z = z
-
-    def set_vx(self, vx):
-        self.vx = vx
-
-    def set_vy(self, vy):
-        self.vy = vy
-
-    def set_vz(self, vz):
-        self.vz = vz
-
     def get_info(self):
         print(self.mass)
         print(self.x, self.y, self.z)

@@ -2,12 +2,13 @@ from body import Body
 import numpy as np
 import math
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 from mpl_toolkits.mplot3d import Axes3D
 import copy
 
 def Sequential_N_Body(bodies, simLength, dt):
     t = [0]
-    bodies_per_t = [bodies]
+    bodies_per_t = [copy.deepcopy(bodies)]
     G = 6.674e-11
     r = 0
     Fx = 0
@@ -60,32 +61,65 @@ def Sequential_N_Body(bodies, simLength, dt):
 
     return bodies_per_t, t
 
-b1 = Body(mass = 1, x = 0, y = 0, z = 0, vx = 0, vy = 0, vz = 0)
-b2 = Body(mass = 2, x = 5, y = 2, z = 4, vx = 0, vy = 0, vz = 0)
+b1 = Body(mass = 1e6, x = 0, y = 0, z = 0, vx = 0, vy = 0, vz = 0)
+b2 = Body(mass = 2e6, x = 5, y = 2, z = 4, vx = 0, vy = 0, vz = 0)
 
 bodies = [b1, b2]
 
-simData, t = Sequential_N_Body(bodies = bodies, simLength = 1000, dt = 1)
+simData, t = Sequential_N_Body(bodies = bodies, simLength = 5000, dt = 20)
 
-x1 = []
-y1 = []
-z1 = []
-x2 = []
-y2 = []
-z2 = []
+def findMinMax(data):
+    xmin = data[0][0].x
+    xmax = data[0][0].x
+    ymin = data[0][0].y
+    ymax = data[0][0].y
+    zmin = data[0][0].z
+    zmax = data[0][0].z
 
-for i in range(len(simData)):
-    x1.append(simData[i][0].x)
-    y1.append(simData[i][0].y)
-    z1.append(simData[i][0].z)
-    x2.append(simData[i][1].x)
-    y2.append(simData[i][1].y)
-    z2.append(simData[i][1].z)
-    for j in range(len(simData[0])):
-        print(simData[i][j].get_info())
+    for i in range(len(data)):
+        for j in range(len(data[i])):
+            if(data[i][j].x < xmin):
+                xmin = data[i][j].x
+            if(data[i][j].x > xmax):
+                xmax = data[i][j].x
+            if(data[i][j].y < ymin):
+                ymin = data[i][j].y
+            if(data[i][j].y > ymax):
+                ymax = data[i][j].y
+            if(data[i][j].z < zmin):
+                zmin = data[i][j].z
+            if(data[i][j].z > zmax):
+                zmax = data[i][j].z
+            print(data[i][j].get_info())
+    print(xmin, xmax)
+    print(ymin, ymax)
+    print(zmin, zmax)
+    return xmin, xmax, ymin, ymax, zmin, zmax
+
+xmin, xmax, ymin, ymax, zmin, zmax = findMinMax(data = simData);
+#print(animation.writers.list())
+
+Writer = animation.writers['pillow']
+writer = Writer(fps = 15)
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection = '3d')
-ax.scatter(xs = x1, ys = y1, zs = z1)
-ax.scatter(xs = x2, ys = y2, zs = z2)
+#ax.scatter([],[], [], color = 'black')
+
+
+def update(i):
+    ax.cla()
+    ax.set_xlim3d([xmin, xmax])
+    ax.set_xlabel('x')
+    ax.set_ylim3d([ymin, ymax])
+    ax.set_ylabel('y')
+    ax.set_zlim3d([zmin, zmax])
+    ax.set_zlabel('z')
+    for j in range(len(simData[i])):
+        ax.scatter(simData[i][j].x, simData[i][j].y, simData[i][j].z)
+
+line_ani = animation.FuncAnimation(fig, update, 250)
+line_ani.save("sequential.gif", writer = writer)
 plt.show()
+print("done?")
+

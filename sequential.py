@@ -19,7 +19,6 @@ def Sequential_N_Body(bodies, simLength, dt):
     az = 0
 
     iterations = int(simLength/dt)
-    print(iterations)
 
     for i in range(iterations):
         for j in range(len(bodies)):
@@ -37,8 +36,8 @@ def Sequential_N_Body(bodies, simLength, dt):
                     r = math.sqrt((x2-x1)**2 + (y2-y1)**2 + (z2-z1)**2)
                     F = (G*m1*m2)/(r**2)
                     #Using spherical coordinates
-                    theta = math.atan((y2-y1)/(x2-x1))
-                    phi = math.atan(math.sqrt((x2-x1)**2 +(y2-y1)**2)/(z2-z1))
+                    theta = math.atan2((y2-y1), (x2-x1))
+                    phi = math.atan2(math.sqrt((x2-x1)**2 + (y2-y1)**2), (z2-z1))
 
                     Fx = F*math.sin(phi)*math.cos(theta)
                     Fy = F*math.sin(phi)*math.sin(theta)
@@ -60,13 +59,6 @@ def Sequential_N_Body(bodies, simLength, dt):
         t.append(i*dt)
 
     return bodies_per_t, t
-
-b1 = Body(mass = 1e6, x = 0, y = 0, z = 0, vx = 0, vy = 0, vz = 0)
-b2 = Body(mass = 2e6, x = 5, y = 2, z = 4, vx = 0, vy = 0, vz = 0)
-
-bodies = [b1, b2]
-
-simData, t = Sequential_N_Body(bodies = bodies, simLength = 5000, dt = 20)
 
 def findMinMax(data):
     xmin = data[0][0].x
@@ -96,18 +88,33 @@ def findMinMax(data):
     print(zmin, zmax)
     return xmin, xmax, ymin, ymax, zmin, zmax
 
-xmin, xmax, ymin, ymax, zmin, zmax = findMinMax(data = simData);
+def cubeSim():
+    b1 = Body(mass = 1e8, x = 0, y = 0, z = 0, vx = 0, vy = 0, vz = 0)
+    b2 = Body(mass = 1e8, x = 0, y = 0, z = 100, vx = 0, vy = 0, vz = 0)
+    b3 = Body(mass = 1e8, x = 100, y = 0, z = 0, vx = 0, vy = 0, vz = 0)
+    b4 = Body(mass = 1e8, x = 100, y = 0, z = 100, vx = 0, vy = 0, vz = 0)
+    b5 = Body(mass = 1e8, x = 0, y = 100, z = 0, vx = 0, vy = 0, vz = 0)
+    b6 = Body(mass = 1e8, x = 0, y = 100, z = 100, vx = 0, vy = 0, vz = 0)
+    b7 = Body(mass = 1e8, x = 100, y = 100, z = 0, vx = 0, vy = 0, vz = 0)
+    b8 = Body(mass = 1e8, x = 100, y = 100, z = 100, vx = 0, vy = 0, vz = 0)
+
+    bodies = [b1, b2, b3, b4, b5, b6, b7, b8]
+    print("initialized bodies for sim")
+    print("running n-body sim")
+    simData, t = Sequential_N_Body(bodies = bodies, simLength = 5000, dt = 25)
+    print("sim complete, making animation (this may take a while)")
+    xmin = -500
+    ymin = -500
+    zmin = -500
+    xmax = 500
+    ymax = 500
+    zmax = 500
+    animate(xmin, xmax, ymin, ymax, zmin, zmax, simData)
+    print("All done!")
+#    xmin, xmax, ymin, ymax, zmin, zmax = findMinMax(data = simData);
 #print(animation.writers.list())
 
-Writer = animation.writers['pillow']
-writer = Writer(fps = 15)
-
-fig = plt.figure()
-ax = fig.add_subplot(111, projection = '3d')
-#ax.scatter([],[], [], color = 'black')
-
-
-def update(i):
+def update(i, ax, xmin, xmax, ymin, ymax, zmin, zmax, simData):
     ax.cla()
     ax.set_xlim3d([xmin, xmax])
     ax.set_xlabel('x')
@@ -118,8 +125,15 @@ def update(i):
     for j in range(len(simData[i])):
         ax.scatter(simData[i][j].x, simData[i][j].y, simData[i][j].z)
 
-line_ani = animation.FuncAnimation(fig, update, 250)
-line_ani.save("sequential.gif", writer = writer)
-plt.show()
-print("done?")
+def animate(xmin, xmax, ymin, ymax, zmin, zmax, data):
+    Writer = animation.writers['pillow']
+    writer = Writer(fps = 15)
 
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection = '3d')
+
+    line_ani = animation.FuncAnimation(fig, update, 200, fargs=(ax, xmin, xmax, ymin, ymax, zmin, zmax, data))
+    line_ani.save("sequential.gif", writer = writer)
+    plt.show()
+
+cubeSim();

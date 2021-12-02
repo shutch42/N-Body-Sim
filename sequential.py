@@ -82,10 +82,10 @@ def findMinMax(data):
                 zmin = data[i][j].z
             if(data[i][j].z > zmax):
                 zmax = data[i][j].z
-            print(data[i][j].get_info())
-    print(xmin, xmax)
-    print(ymin, ymax)
-    print(zmin, zmax)
+#            print(data[i][j].get_info())
+#    print(xmin, xmax)
+#    print(ymin, ymax)
+#    print(zmin, zmax)
     return xmin, xmax, ymin, ymax, zmin, zmax
 
 def cubeSim():
@@ -114,6 +114,28 @@ def cubeSim():
 #    xmin, xmax, ymin, ymax, zmin, zmax = findMinMax(data = simData);
 #print(animation.writers.list())
 
+def lottaMassesSim():
+    bodies = []
+    for i in range(0,101,25):
+        for j in range(0,101,25):
+            for k in range(0,101,25):
+                b = Body(mass = 1e6, x = i, y = j, z = k, vx = 0, vy = 0, vz = 0)
+                bodies.append(copy.deepcopy(b))
+
+    print("initialized 64 bodies for sim")
+    print("running n-body sim")
+    simData, t = Sequential_N_Body(bodies = bodies, simLength = 2000, dt = 10)
+    xmin = 0
+    ymin = 0
+    zmin = 0
+    xmax = 100
+    ymax = 100
+    zmax = 100
+    print("creating animation (this will take a while)")
+    animate(xmin, xmax, ymin, ymax, zmin, zmax, simData)
+    print("All done!")
+
+
 def update(i, ax, xmin, xmax, ymin, ymax, zmin, zmax, simData):
     ax.cla()
     ax.set_xlim3d([xmin, xmax])
@@ -136,4 +158,4 @@ def animate(xmin, xmax, ymin, ymax, zmin, zmax, data):
     line_ani.save("sequential.gif", writer = writer)
     plt.show()
 
-cubeSim();
+lottaMassesSim();

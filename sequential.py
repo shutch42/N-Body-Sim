@@ -144,8 +144,9 @@ def update(i, ax, xmin, xmax, ymin, ymax, zmin, zmax, simData):
     ax.set_ylabel('y')
     ax.set_zlim3d([zmin, zmax])
     ax.set_zlabel('z')
+    ax.grid(False)
     for j in range(len(simData[i])):
-        ax.scatter(simData[i][j].x, simData[i][j].y, simData[i][j].z)
+        ax.scatter(simData[i][j].x, simData[i][j].y, simData[i][j].z, c='white', s = 5)
 
 def animate(xmin, xmax, ymin, ymax, zmin, zmax, data):
     Writer = animation.writers['pillow']
@@ -153,6 +154,16 @@ def animate(xmin, xmax, ymin, ymax, zmin, zmax, data):
 
     fig = plt.figure()
     ax = fig.add_subplot(111, projection = '3d')
+
+    fig.set_facecolor('black')
+    ax.set_facecolor('black')
+    ax.grid(False)
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.set_zticks([])
+    ax.w_xaxis.set_pane_color((0.0, 0.0, 0.0, 0.0))
+    ax.w_yaxis.set_pane_color((0.0, 0.0, 0.0, 0.0))
+    ax.w_zaxis.set_pane_color((0.0, 0.0, 0.0, 0.0))
 
     line_ani = animation.FuncAnimation(fig, update, 200, fargs=(ax, xmin, xmax, ymin, ymax, zmin, zmax, data))
     line_ani.save("sequential.gif", writer = writer)

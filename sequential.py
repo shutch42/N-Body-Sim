@@ -169,4 +169,4 @@ def animate(xmin, xmax, ymin, ymax, zmin, zmax, data):
     line_ani.save("sequential.gif", writer = writer)
     plt.show()
 
-lottaMassesSim();
+cubeSim();

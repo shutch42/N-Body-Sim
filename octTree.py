@@ -87,7 +87,7 @@ class octTree:
                         self.q6.addBody(self.bodies[i])
                     elif(x < self.xOrigin and y < self.yOrigin and z < self.zOrigin):
                         self.q7.addBody(self.bodies[i])
-                    else:
+                    elif(x > self.xOrigin and y < self.yOrigin and y < self.zOrigin):
                         self.q8.addBody(self.bodies[i])
 
          

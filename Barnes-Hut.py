@@ -7,7 +7,7 @@ import matplotlib.animation as animation
 from mpl_toolkits.mplot3d import Axes3D
 import copy
 
-thetaComp = 0.5
+thetaComp = .5
 G = 6.674e-11
 
 def findLengthAndCenter(data):
@@ -32,7 +32,7 @@ def findLengthAndCenter(data):
             if(data[i].z > zmax):
                 zmax = data[i].z
 
-        length = math.sqrt((xmax - xmin)**2 + (ymax - ymin)**2 + (zmax - zmin)**2)
+        length = max(xmax-xmin, ymax-ymin, zmax-zmin)*1.0001 #This is dumb, but it prevents bodies from getting caught on corners of the octTree
         centerX = (xmax - xmin)/2
         centerY = (ymax - ymin)/2
         centerZ = (zmax - zmin)/2
@@ -84,20 +84,73 @@ def BH_N_Body(bodies, simLength, dt):
     bodies_per_t = [copy.deepcopy(bodies)]
     iterations = int(simLength/dt)
     for i in range(iterations):
+        print(i)
         timeStep(bodies, dt)
         t.append(i*dt)
         bodies_per_t.append(copy.deepcopy(bodies))
     return bodies_per_t, t
 
-b1 = Body(mass = 1e8, x = 0, y = 0, z = 0, vx = 0, vy = 0, vz = 0)
-b2 = Body(mass = 1e8, x = 0, y = 0, z = 100, vx = 0, vy = 0, vz = 0)
-b3 = Body(mass = 1e8, x = 100, y = 0, z = 0, vx = 0, vy = 0, vz = 0)
-b4 = Body(mass = 1e8, x = 100, y = 0, z = 100, vx = 0, vy = 0, vz = 0)
-b5 = Body(mass = 1e8, x = 0, y = 100, z = 0, vx = 0, vy = 0, vz = 0)
-b6 = Body(mass = 1e8, x = 0, y = 100, z = 100, vx = 0, vy = 0, vz = 0)
-b7 = Body(mass = 1e8, x = 100, y = 100, z = 0, vx = 0, vy = 0, vz = 0)
-b8 = Body(mass = 1e8, x = 100, y = 100, z = 100, vx = 0, vy = 0, vz = 0)
-bodies = [b1, b2, b3, b4, b5, b6, b7, b8]
+def update(i, ax, xmin, xmax, ymin, ymax, zmin, zmax, simData):
+    ax.cla()
+    ax.set_xlim3d([xmin, xmax])
+    ax.set_xlabel('x')
+    ax.set_ylim3d([ymin, ymax])
+    ax.set_ylabel('y')
+    ax.set_zlim3d([zmin, zmax])
+    ax.set_zlabel('z')
+    for j in range(len(simData[i])):
+        ax.scatter(simData[i][j].x, simData[i][j].y, simData[i][j].z, c='black', s = 5)
 
-simData, t = BH_N_Body(bodies, 5000, dt = 25)
+def animate(xmin, xmax, ymin, ymax, zmin, zmax, data):
+    Writer = animation.writers['pillow']
+    writer = Writer(fps = 15)
 
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection = '3d')
+
+    line_ani = animation.FuncAnimation(fig, update, 200, fargs=(ax, xmin, xmax, ymin, ymax, zmin, zmax, data))
+    line_ani.save("sequential.gif", writer = writer)
+    plt.show()
+
+def findMinMax(data):
+    xmin = data[0][0].x
+    xmax = data[0][0].x
+    ymin = data[0][0].y
+    ymax = data[0][0].y
+    zmin = data[0][0].z
+    zmax = data[0][0].z
+
+    for i in range(len(data)):
+        for j in range(len(data[i])):
+            if(data[i][j].x < xmin):
+                xmin = data[i][j].x
+            if(data[i][j].x > xmax):
+                xmax = data[i][j].x
+            if(data[i][j].y < ymin):
+                ymin = data[i][j].y
+            if(data[i][j].y > ymax):
+                ymax = data[i][j].y
+            if(data[i][j].z < zmin):
+                zmin = data[i][j].z
+            if(data[i][j].z > zmax):
+                zmax = data[i][j].z
+#            print(data[i][j].get_info())
+#    print(xmin, xmax)
+#    print(ymin, ymax)
+#    print(zmin, zmax)
+    return xmin, xmax, ymin, ymax, zmin, zmax
+
+bodies = []
+for i in range(0,101,25):
+    for j in range(0,101,25):
+        for k in range(0,101,25):
+            b = Body(mass = 1e6, x = i, y = j, z = k, vx = 0, vy = 0, vz = 0)
+            bodies.append(copy.deepcopy(b))
+
+print("initialized 125 bodies for sim")
+print("running n-body sim")
+simData, t = BH_N_Body(bodies = bodies, simLength = 2000, dt = 10)
+print("creating animation (this will take a while)")
+xmin, xmax, ymin, ymax, zmin, zmax = findMinMax(simData)
+animate(xmin, xmax, ymin, ymax, zmin, zmax, simData)
+print("All done!")
